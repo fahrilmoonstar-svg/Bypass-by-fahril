@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RILLZY DEX — FAHRIL MOONSTAR</title>
+  
+  <!-- Font Cyberpunk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --hitam: #050508;
+      --gelap: #0c0c14;
+      --abu: #1a1a2e;
+      --abu-terang: #6e6e94;
+      --teks: #e0e0ff;
+      --neon-cyan: #00f0ff;
+      --neon-biru: #0088ff;
+      --neon-ungu: #8b5cf6;
+      --neon-pink: #ff2d95;
+      --sukses: #00ffa3;
+      --bahaya: #ff4d6a;
+      --kabel: rgba(0, 240, 255, 0.08);
+    }
+
+    body {
+      background: var(--hitam);
+      color: var(--teks);
+      min-height: 100vh;
+      padding: 2rem 1.2rem;
+      line-height: 1.6;
+      font-family: 'Inter', sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Scanline effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.03) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Grid background */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(var(--kabel) 1px, transparent 1px),
+        linear-gradient(90deg, var(--kabel) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container { max-width: 540px; margin: 0 auto; position: relative; z-index: 1; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-ungu));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+      position: relative;
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      right: -0.5em;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.6em;
+      height: 1.2em;
+      background: var(--neon-cyan);
+      animation: kedip 1.2s infinite;
+      box-shadow: 0 0 15px var(--neon-cyan);
+    }
+
+    .sisa-quota { 
+      font-size: 0.85rem; 
+      color: var(--abu-terang); 
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    h1 { 
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem; 
+      margin-bottom: 1.5rem; 
+      line-height: 1.4; 
+      font-weight: 700;
+    }
+    h1 span { 
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .steps {
+      background: var(--gelap);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.05), transparent);
+      animation: scan 4s infinite;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      color: var(--abu-terang);
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .step.aktif, .step.selesai { color: var(--teks); }
+    .step.selesai .step-icon { color: var(--sukses); text-shadow: 0 0 8px var(--sukses); }
+    .step.aktif .step-icon { 
+      color: var(--neon-cyan); 
+      text-shadow: 0 0 10px var(--neon-cyan);
+      animation: pulse 1s infinite;
+    }
+
+    .step-icon {
+      width: 20px;
+      display: inline-block;
+      text-align: center;
+      color: var(--abu-terang);
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .input-wrap { margin-bottom: 1.5rem; }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--abu-terang);
+      margin-bottom: 0.5rem;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    input[type="url"] {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      background: rgba(26, 26, 46, 0.6);
+      border: 1px solid rgba(110, 110, 148, 0.3);
+      border-radius: 8px;
+      color: var(--teks);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    input[type="url"]:focus { 
+      border-color: var(--neon-cyan); 
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 8px rgba(0, 240, 255, 0.05);
+    }
+    input[type="url"].error { 
+      border-color: var(--bahaya); 
+      box-shadow: 0 0 12px rgba(255, 77, 106, 0.2);
+    }
+    input::placeholder { color: #3a3a52; }
+
+    button {
+      width: 100%;
+      padding: 0.95rem;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-ungu));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.08em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover:not(:disabled)::before { left: 100%; }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.35), 0 0 50px rgba(139, 92, 246, 0.15);
+    }
+
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .hasil-box {
+      background: var(--gelap);
+      border: 1px solid rgba(0, 255, 163, 0.25);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      display: none;
+      position: relative;
+    }
+
+    .hasil-box::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 20%;
+      right: 20%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--sukses), transparent);
+    }
+
+    .hasil-box.tampil {
+      display: block;
+      animation: muncul 0.5s ease-out;
+    }
+
+    @keyframes muncul {
+      from { opacity: 0; transform: translateY(15px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .hasil-label { 
+      font-size: 0.85rem; 
+      color: var(--sukses); 
+      margin-bottom: 0.5rem; 
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 6px rgba(0, 255, 163, 0.3);
+    }
+    .hasil-label.error { 
+      color: var(--bahaya); 
+      text-shadow: 0 0 6px rgba(255, 77, 106, 0.3);
+    }
+
+    .hasil-link {
+      word-break: break-all;
+      font-size: 0.9rem;
+      color: var(--neon-cyan);
+      margin-bottom: 0.75rem;
+      text-shadow: 0 0 5px rgba(0, 240, 255, 0.2);
+    }
+
+    .hasil-actions { display: flex; gap: 0.75rem; }
+    .hasil-actions button { flex: 1; font-size: 0.85rem; padding: 0.6rem; }
+    .hasil-actions button.secondary { 
+      background: transparent;
+      border: 1px solid rgba(110, 110, 148, 0.4);
+      color: var(--teks);
+      letter-spacing: normal;
+    }
+    .hasil-actions button.secondary:hover {
+      border-color: var(--neon-ungu);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
+    }
+
+    .riwayat { margin-bottom: 3rem; }
+    .riwayat h3 { 
+      font-size: 1rem; 
+      margin-bottom: 0.75rem; 
+      color: var(--abu-terang); 
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.1em;
+    }
+
+    .riwayat-item {
+      background: var(--gelap);
+      border: 1px solid rgba(110, 110, 148, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--abu-terang);
+      margin-bottom: 0.5rem;
+      word-break: break-all;
+      transition: border-color 0.2s;
+    }
+
+    .riwayat-item:hover {
+      border-color: rgba(0, 240, 255, 0.2);
+    }
+
+    .riwayat-kosong { font-size: 0.9rem; color: #3a3a52; font-style: italic; }
+
+    .about { margin-bottom: 3rem; }
+
+    .about h2 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--abu-terang);
+      margin-bottom: 1rem;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .about h3 { 
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem; 
+      margin-bottom: 1rem; 
+      line-height: 1.3;
+    }
+    .about h3 span { 
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .about p {
+      color: var(--abu-terang);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+
+    .guide h4 { 
+      font-size: 1rem; 
+      margin-bottom: 1rem; 
+      color: var(--teks); 
+      font-family: 'Orbitron', sans-serif;
+    }
+    .guide-steps { display: grid; gap: 1rem; }
+    .guide-step { display: flex; gap: 1rem; }
+
+    .guide-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      opacity: 0.4;
+      line-height: 1;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+
+    .guide-content strong { display: block; font-size: 0.95rem; color: var(--teks); }
+    .guide-content span { font-size: 0.85rem; color: var(--abu-terang); }
+
+    .system-info {
+      background: var(--gelap);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin: 2rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .system-info::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-ungu), var(--neon-pink));
+      opacity: 0.6;
+    }
+
+    .system-info h4 { 
+      font-size: 0.9rem; 
+      margin-bottom: 0.75rem; 
+      color: var(--neon-cyan); 
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.1em;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .info-grid span:first-child { 
+      color: var(--abu-terang); 
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(0, 240, 255, 0.1);
+      color: var(--abu-terang);
+      font-size: 0.8rem;
+    }
+
+    footer p { margin: 0.25rem 0; }
+    footer p span {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 5px rgba(0, 240, 255, 0.2);
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--sukses);
+      font-size: 0.8rem;
+      margin-top: 0.75rem;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--sukses);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--sukses), 0 0 16px var(--sukses);
+      animation: kedip 1.5s infinite;
+    }
+
+    @keyframes kedip {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--sukses), 0 0 16px var(--sukses); }
+      50% { opacity: 0.3; box-shadow: 0 0 2px var(--sukses); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(140px);
+      background: rgba(26, 26, 46, 0.95);
+      color: var(--teks);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 999;
+      border: 1px solid var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+      backdrop-filter: blur(10px);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">RILLZY DEX</div>
+      <div class="sisa-quota" id="quotaText">SISA: 20</div>
+    </header>
+
+    <main>
+      <h1>BYPASS LINK SFL<br><span>DALAM HITUNGAN DETIK</span></h1>
+
+      <div class="steps" id="stepsBox">
+        <div class="step" id="s1"><span class="step-icon">○</span> MEMBACA URL</div>
+        <div class="step" id="s2"><span class="step-icon">○</span> MEMVALIDASI</div>
+        <div class="step" id="s3"><span class="step-icon">○</span> MENGHUBUNGKAN</div>
+        <div class="step" id="s4"><span class="step-icon">○</span> MEMPROSES</div>
+        <div class="step" id="s5"><span class="step-icon">✓</span> SELESAI</div>
+      </div>
+
+      <div class="input-wrap">
+        <label for="linkInput">LINK SFL</label>
+        <input type="url" id="linkInput" placeholder="https://sfl.gl/..." autocomplete="off">
+        <button id="bypassBtn" style="margin-top: 0.75rem;">⚡ BYPASS NOW</button>
+      </div>
+
+      <div class="hasil-box" id="hasilBox">
+        <div class="hasil-label" id="hasilLabel">✅ BERHASIL DIPROSES</div>
+        <div class="hasil-link" id="hasilLink">—</div>
+        <div class="hasil-actions" id="hasilActions">
+          <button class="secondary" id="copyBtn" type="button">📋 SALIN</button>
+          <button id="openBtn" type="button">🔗 BUKA LINK</button>
+        </div>
+      </div>
+
+      <div class="riwayat">
+        <h3>📂 RIWAYAT</h3>
+        <div id="riwayatList">
+          <p class="riwayat-kosong">Belum ada riwayat. Hasil bypass terakhir akan muncul di sini.</p>
+        </div>
+      </div>
+
+      <div class="about">
+        <h2>ABOUT THE PLATFORM — 01 / RILLZY</h2>
+        <h3>BEYOND THE <span>LINK.</span></h3>
+        <p><strong>RILLZY DEX</strong> merupakan platform pemrosesan safelink yang dirancang untuk membantu pengguna menemukan tautan langsung ke tujuan dengan proses yang cepat dan sederhana. Dibangun dengan teknologi modern untuk pengalaman terbaik.</p>
+
+        <div class="guide">
+          <h4>01 — USER GUIDE</h4>
+          <p style="color:var(--teks); font-weight:500; margin-bottom:1rem;">Cara Penggunaan</p>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <div class="guide-num">01</div>
+              <div class="guide-content">
+                <strong>SALIN TAUTAN</strong>
+                <span>Salin link safelink SFL yang ingin diproses.</span>
+              </div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-num">02</div>
+              <div class="guide-content">
+                <strong>MASUKKAN LINK</strong>
+                <span>Tempel tautan ke kolom yang tersedia.</span>
+              </div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-num">03</div>
+              <div class="guide-content">
+                <strong>MULAI PROSES</strong>
+                <span>Tekan tombol BYPASS NOW dan tunggu hingga selesai.</span>
+              </div>
+            </div>
+            <div class="guide-step">
+              <div class="guide-num">04</div>
+              <div class="guide-content">
+                <strong>AMBIL HASIL</strong>
+                <span>Salin tautan tujuan atau tekan tombol BUKA LINK.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="system-info">
+        <h4>⚡ SYSTEM INFO</h4>
+        <p style="font-size:0.85rem; color:var(--abu-terang); margin-bottom:0.75rem;">Platform pemrosesan safelink dengan tampilan sederhana, cepat, dan elegan.</p>
+        <div class="info-grid">
+          <span>PLATFORM</span><span>RILLZY DEX</span>
+          <span>DEVELOPER</span><span><span>FAHRIL MOONSTAR</span></span>
+          <span>API PROVIDER</span><span>ZAPI</span>
+          <span>INTERFACE</span><span>CYBERPUNK UI</span>
+          <span>VERSION</span><span>2.0.0</span>
+          <span>STATUS</span><span>ONLINE ✅</span>
+        </div>
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          RILLZY DEX SYSTEM ONLINE — FAHRIL MOONSTAR © 2026
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p><span>DESIGNED BY FAHRIL MOONSTAR</span></p>
+      <p>RILLZY DEX © 2026 · ALL RIGHTS RESERVED</p>
+      <p style="margin-top:0.5rem;">⚡ Built with passion · API BY ZAPI</p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ==== Konfigurasi ====
+      const CONFIG = {
+        apiUrl: 'https://api.zpi.my.id/api/tools/bypass-sfl',
+        paramName: 'url',
+        dailyQuota: 20,
+        quotaKey: 'rillzy_quota',
+        historyKey: 'rillzy_history'
+      };
+
+      // ==== State ====
+      let history = [];
+
+      // ==== Elemen ====
+      const $ = (id) => document.getElementById(id);
+      const linkInput = $('linkInput');
+      const bypassBtn = $('bypassBtn');
+      const hasilBox = $('hasilBox');
+      const hasilLink = $('hasilLink');
+      const hasilLabel = $('hasilLabel');
+      const hasilActions = $('hasilActions');
+      const riwayatList = $('riwayatList');
+      const quotaText = $('quotaText');
+      const copyBtn = $('copyBtn');
+      const openBtn = $('openBtn');
+      const toastEl = $('toast');
+
+      // ==== Util ====
+      const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toastEl.classList.remove('show'), 2500);
+      }
+
+      function isValidSfl(url) {
+        try {
+          const u = new URL(url);
+          return /(^|\.)sfl\.gl$/i.test(u.hostname);
+        } catch (e) {
+          return false;
+        }
+      }
+
+      // ==== Kuota ====
+      function getQuota() {
+        const today = new Date().toISOString().slice(0, 10);
+        try {
+          const raw = JSON.parse(localStorage.getItem(CONFIG.quotaKey) || '{}');
+          if (raw.date !== today) return { date: today, used: 0 };
+          return raw;
+        } catch (e) {
+          return { date: today, used: 0 };
+        }
+      }
+
+      function setQuota(q) {
+        localStorage.setItem(CONFIG.quotaKey, JSON.stringify(q));
+        renderQuota();
+      }
+
+      function renderQuota() {
+        const q = getQuota();
+        const sisa = Math.max(0, CONFIG.dailyQuota - q.used);
+        quotaText.textContent = `SISA: ${sisa}`;
+      }
+
+      // ==== Riwayat ====
+      function loadHistory() {
+        try {
+          history = JSON.parse(localStorage.getItem(CONFIG.historyKey) || '[]');
+        } catch (e) {
+          history = [];
+        }
+        renderHistory();
+      }
+
+      function saveHistory() {
+        localStorage.setItem(CONFIG.historyKey, JSON.stringify(history));
+      }
+
+      function addHistory(original, result) {
+        history.unshift({
+          asli: original,
+          hasil: result,
+          waktu: new Date().toLocaleString('id-ID')
+        });
+        if (history.length > 10) history.pop();
+        saveHistory();
+        renderHistory();
+      }
+
+      function shorten(str, max) {
+        return str.length > max ? str.slice(0, max) + '…' : str;
+      }
+
+      function renderHistory() {
+        if (!history.length) {
+          riwayatList.innerHTML = '<p class="riwayat-kosong">Belum ada riwayat. Hasil bypass terakhir akan muncul di sini.</p>';
+          return;
+        }
+        riwayatList.innerHTML = history.map((item) => `
+          <div class="riwayat-item">
+            <div style="font-size:0.75rem; margin-bottom:0.25rem;">${item.waktu}</div>
+            <div style="margin-bottom:0.25rem;">📥 ${shorten(item.asli, 40)}</div>
+            <div style="color:var(--neon-cyan);">📤 ${shorten(item.hasil, 40)}</div>
+          </div>
+        `).join('');
+      }
+
+      // ==== Step UI ====
+      function setStep(n, status) {
+        const el = $('s' + n);
+        if (!el) return;
+        el.classList.remove('aktif', 'selesai');
+        const icon = el.querySelector('.step-icon');
+        if (status === 'aktif') {
+          el.classList.add('aktif');
+          icon.textContent = '◷';
+        } else if (status === 'selesai') {
+          el.classList.add('selesai');
+          icon.textContent = '✓';
+        } else {
+          icon.textContent = '○';
+        }
+      }
+
+      function resetSteps() {
+        for (let i = 1; i <= 5; i++) setStep(i, 'reset');
+      }
+
+      // ==== Bypass API ====
+      async function bypassSfl(url) {
+        const endpoints = [
+          `${CONFIG.apiUrl}?${CONFIG.paramName}=${encodeURIComponent(url)}`,
+          `https://corsproxy.io/?${encodeURIComponent(CONFIG.apiUrl + '?' + CONFIG.paramName + '=' + encodeURIComponent(url))}`
+        ];
+
+        let lastError = null;
+        for (const endpoint of endpoints) {
+          try {
+            const res = await fetch(endpoint, {
+              method: 'GET',
+              headers: { 'Accept': 'application/json' }
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            const result =
+              data?.result ||
+              data?.data?.result ||
+              data?.data?.url ||
+              data?.url ||
+              data?.data;
+            if (typeof result === 'string' && result.startsWith('http')) {
+              return result;
+            }
+            if (typeof result === 'object' && result) {
+              const candidate = result.url || result.link || result.tujuan;
+              if (typeof candidate === 'string' && candidate.startsWith('http')) {
+                return candidate;
+              }
+            }
+            throw new Error('Respons tidak valid: ' + JSON.stringify(data).slice(0, 120));
+          } catch (err) {
+            lastError = err;
+          }
+        }
+        throw lastError || new Error('Gagal memproses link');
+      }
+
+      // ==== Handler utama ====
+      async function jalankanProses() {
+        const link = linkInput.value.trim();
+        linkInput.classList.remove('error');
+
+        if (!link) {
+          linkInput.classList.add('error');
+          showToast('⚠️ Masukkan link SFL terlebih dahulu!');
+          linkInput.focus();
+          return;
+        }
+
+        if (!isValidSfl(link)) {
+          linkInput.classList.add('error');
+          showToast('⚠️ Link harus dari domain sfl.gl');
+          linkInput.focus();
+          return;
+        }
+
+        const q = getQuota();
+        if (q.used >= CONFIG.dailyQuota) {
+          showToast('❌ Kuota hari ini habis. Coba lagi besok.');
+          return;
+        }
+
+        resetSteps();
+        hasilBox.classList.remove('tampil');
+        bypassBtn.disabled = true;
+        bypassBtn.textContent = '⚡ MEMPROSES...';
+
+        try {
+          await delay(400); setStep(1, 'aktif');
+          await delay(400); setStep(1, 'selesai'); setStep(2, 'aktif');
+          await delay(300); setStep(2, 'selesai'); setStep(3, 'aktif');
+
+          let hasilAkhir;
+          try {
+            hasilAkhir = await bypassSfl(link);
+          } catch (err) {
+            throw err;
+          }
+
+          setStep(3, 'selesai'); setStep(4, 'aktif');
+          await delay(400);
+
+          if (!/^https?:\/\//i.test(hasilAkhir)) {
+            throw new Error('Hasil bukan URL valid');
+          }
+
+          setStep(4, 'selesai'); setStep(5, 'selesai');
+
+          hasilLabel.textContent = '✅ BERHASIL DIPROSES';
+          hasilLabel.classList.remove('error');
+          hasilLink.textContent = hasilAkhir;
+          hasilActions.style.display = 'flex';
+          hasilBox.classList.add('tampil');
+
+          addHistory(link, hasilAkhir);
+          setQuota({ date: q.date, used: q.used + 1 });
+
+          showToast('🎉 Bypass berhasil!');
+        } catch (err) {
+          console.error('Bypass error:', err);
+
+          hasilLabel.textContent = '❌ GAGAL MEMPROSES';
+          hasilLabel.classList.add('error');
+          hasilLink.textContent = 'Server sedang tidak tersedia. Coba beberapa saat lagi.';
+          hasilActions.style.display = 'none';
+          hasilBox.classList.add('tampil');
+
+          setStep(4, 'selesai');
+          setStep(5, 'reset');
+          showToast('❌ Gagal: ' + (err.message || 'Server error'));
+        } finally {
+          bypassBtn.disabled = false;
+          bypassBtn.textContent = '⚡ BYPASS NOW';
+        }
+      }
+
+      // ==== Aksi hasil ====
+      async function salinLink() {
+        const text = hasilLink.textContent;
+        if (!text || !/^https?:\/\//i.test(text)) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('📋 Link disalin!');
+        } catch (e) {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('📋 Link disalin!');
+        }
+      }
+
+      function bukaLink() {
+        const text = hasilLink.textContent;
+        if (!text || !/^https?:\/\//i.test(text)) return;
+        window.open(text, '_blank', 'noopener,noreferrer');
+      }
+
+      // ==== Inisialisasi & event ====
+      bypassBtn.addEventListener('click', jalankanProses);
+      copyBtn.addEventListener('click', salinLink);
+      openBtn.addEventListener('click', bukaLink);
+
+      linkInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          jalankanProses();
+        }
+      });
+
+      linkInput.addEventListener('input', () => {
+        linkInput.classList.remove('error');
+      });
+
+      renderQuota();
+      loadHistory();
+    })();
+  </script>
+</body>
+</html>
+
+         
