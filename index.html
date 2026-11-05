@@ -43,7 +43,6 @@
       overflow-x: hidden;
     }
 
-    /* Scanline effect */
     body::before {
       content: '';
       position: fixed;
@@ -57,7 +56,6 @@
       z-index: 100;
     }
 
-    /* Grid background */
     body::after {
       content: '';
       position: fixed;
@@ -521,7 +519,7 @@
         <div class="step" id="s2"><span class="step-icon">○</span> MEMVALIDASI</div>
         <div class="step" id="s3"><span class="step-icon">○</span> MENGHUBUNGKAN</div>
         <div class="step" id="s4"><span class="step-icon">○</span> MEMPROSES</div>
-        <div class="step" id="s5"><span class="step-icon">✓</span> SELESAI</div>
+        <div class="step" id="s5"><span class="step-icon">○</span> SELESAI</div>
       </div>
 
       <div class="input-wrap">
@@ -592,8 +590,8 @@
         <p style="font-size:0.85rem; color:var(--abu-terang); margin-bottom:0.75rem;">Platform pemrosesan safelink dengan tampilan sederhana, cepat, dan elegan.</p>
         <div class="info-grid">
           <span>PLATFORM</span><span>RILLZY DEX</span>
-          <span>DEVELOPER</span><span><span>FAHRIL MOONSTAR</span></span>
-          <span>API PROVIDER</span><span>ZAPI</span>
+          <span>DEVELOPER</span><span>FAHRIL MOONSTAR</span>
+          <span>API PROVIDER</span><span>KYZZZ</span>
           <span>INTERFACE</span><span>CYBERPUNK UI</span>
           <span>VERSION</span><span>2.0.0</span>
           <span>STATUS</span><span>ONLINE ✅</span>
@@ -608,7 +606,7 @@
     <footer>
       <p><span>DESIGNED BY FAHRIL MOONSTAR</span></p>
       <p>RILLZY DEX © 2026 · ALL RIGHTS RESERVED</p>
-      <p style="margin-top:0.5rem;">⚡ Built with passion · API BY ZAPI</p>
+      <p style="margin-top:0.5rem;">⚡ Built with passion · API BY KYZZZ</p>
     </footer>
   </div>
 
@@ -620,8 +618,8 @@
 
       // ==== Konfigurasi ====
       const CONFIG = {
-        apiUrl: 'https://api.zpi.my.id/api/tools/bypass-sfl',
-        paramName: 'url',
+        apiUrl: 'https://api.kyzzz.xyz/api/bypass/sfl',
+        apiKey: 'kyzz04932925',
         dailyQuota: 20,
         quotaKey: 'rillzy_quota',
         historyKey: 'rillzy_history'
@@ -752,41 +750,21 @@
 
       // ==== Bypass API ====
       async function bypassSfl(url) {
-        const endpoints = [
-          `${CONFIG.apiUrl}?${CONFIG.paramName}=${encodeURIComponent(url)}`,
-          `https://corsproxy.io/?${encodeURIComponent(CONFIG.apiUrl + '?' + CONFIG.paramName + '=' + encodeURIComponent(url))}`
-        ];
-
-        let lastError = null;
-        for (const endpoint of endpoints) {
-          try {
-            const res = await fetch(endpoint, {
-              method: 'GET',
-              headers: { 'Accept': 'application/json' }
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            const result =
-              data?.result ||
-              data?.data?.result ||
-              data?.data?.url ||
-              data?.url ||
-              data?.data;
-            if (typeof result === 'string' && result.startsWith('http')) {
-              return result;
-            }
-            if (typeof result === 'object' && result) {
-              const candidate = result.url || result.link || result.tujuan;
-              if (typeof candidate === 'string' && candidate.startsWith('http')) {
-                return candidate;
-              }
-            }
-            throw new Error('Respons tidak valid: ' + JSON.stringify(data).slice(0, 120));
-          } catch (err) {
-            lastError = err;
-          }
+        const fullUrl = `${CONFIG.apiUrl}?url=${encodeURIComponent(url)}&apikey=${CONFIG.apiKey}`;
+        
+        const res = await fetch(fullUrl, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        
+        if (!data.status) {
+          throw new Error(data.message || 'API mengembalikan status gagal');
         }
-        throw lastError || new Error('Gagal memproses link');
+        
+        return data.result.destinationUrl;
       }
 
       // ==== Handler utama ====
@@ -824,20 +802,10 @@
           await delay(400); setStep(1, 'selesai'); setStep(2, 'aktif');
           await delay(300); setStep(2, 'selesai'); setStep(3, 'aktif');
 
-          let hasilAkhir;
-          try {
-            hasilAkhir = await bypassSfl(link);
-          } catch (err) {
-            throw err;
-          }
+          const hasilAkhir = await bypassSfl(link);
 
           setStep(3, 'selesai'); setStep(4, 'aktif');
           await delay(400);
-
-          if (!/^https?:\/\//i.test(hasilAkhir)) {
-            throw new Error('Hasil bukan URL valid');
-          }
-
           setStep(4, 'selesai'); setStep(5, 'selesai');
 
           hasilLabel.textContent = '✅ BERHASIL DIPROSES';
@@ -855,7 +823,7 @@
 
           hasilLabel.textContent = '❌ GAGAL MEMPROSES';
           hasilLabel.classList.add('error');
-          hasilLink.textContent = 'Server sedang tidak tersedia. Coba beberapa saat lagi.';
+          hasilLink.textContent = err.message || 'Server sedang tidak tersedia. Coba beberapa saat lagi.';
           hasilActions.style.display = 'none';
           hasilBox.classList.add('tampil');
 
@@ -915,4 +883,4 @@
 </body>
 </html>
 
-         
+       
